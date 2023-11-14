@@ -55,7 +55,7 @@ To:
 
 The installation takes up to 15 minutes.
 
-## 2. Set root password and disable port 111
+## 2. Set root password and disable port 111 or service
 
 After installation a password must be assigned to the root user if access to the Hetzner machine is via ssh-key. The access will be done via the Linux PAM authentication module.
 
@@ -68,6 +68,10 @@ Proxmox opens port 111 by default, which is a security risk. Therefore, the port
     iptables -A INPUT -p tcp -m tcp --dport 111 -j DROP
     iptables -A INPUT -p udp -m udp --dport 111 -j DROP
     sudo /sbin/iptables-save
+
+    ##if the service is not needed, then disable and mask it
+    sudo systemctl disable --now rpcbind rpcbind.socket
+    sudo systemctl mask rpcbind
 
 Now open the Proxmox-Webconsole with your ordered server IP-Address (MAIN-IP) and login with root and your password:
 
