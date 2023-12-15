@@ -12,6 +12,7 @@ prompt_input() {
 create_bridge_text() {
     local ip=$1
     local bridge_id=$2
+    local mac_address=$3
     echo "
 auto vmbr${bridge_id}
 iface vmbr${bridge_id} inet static
@@ -20,6 +21,7 @@ iface vmbr${bridge_id} inet static
     bridge_ports none
     bridge_stp off
     bridge_fd 0
+    hwaddress ether ${mac_address}
 #LAN${bridge_id}"
 }
 
@@ -29,6 +31,7 @@ GATEWAYADDRESS=$(prompt_input "MAIN_SERVER_GATEWAY_ADDRESS" "192.168.0.254")
 NETMASK=$(prompt_input "NETMASK" "255.255.255.0")
 BROADCASTIP=$(prompt_input "BROADCASTIP" "192.168.0.255")
 ADD_IP_ADDRESSES=$(prompt_input "ADDITIONAL_IP_ADDRESSES (comma-separated)" "")
+MAC_ADDRESSES=$(prompt_input "MAC_ADDRESSES for additional IPs (comma-separated)" "")
 NETWORK_INTERFACE=$(prompt_input "NETWORK_INTERFACE" "eth0")
 
 # Display inputs for confirmation
@@ -39,6 +42,7 @@ echo "MAIN_SERVER_GATEWAY_ADDRESS: $GATEWAYADDRESS"
 echo "NETMASK: $NETMASK"
 echo "BROADCASTIP: $BROADCASTIP"
 echo "ADDITIONAL_IP_ADDRESSES: $ADD_IP_ADDRESSES"
+echo "MAC_ADDRESSES: $MAC_ADDRESSES"
 echo "NETWORK_INTERFACE: $NETWORK_INTERFACE"
 
 echo "---------------------------------------------------------------------"
@@ -49,8 +53,9 @@ if [[ $confirmation != [Yy]* ]]; then
     exit
 fi
 
-# Split ADD_IP_ADDRESSES into an array
+# Split ADD_IP_ADDRESSES and MAC_ADDRESSES into arrays
 IFS=',' read -ra ADDR <<<"$ADD_IP_ADDRESSES"
+IFS=',' read -ra MACS <<<"$MAC_ADDRESSES"
 
 # Initialize the interfaces file content
 interfaces_content="
@@ -89,9 +94,9 @@ iface vmbr0 inet static
 #WAN
 "
 
-# Append bridge interfaces for each additional IP
+# Append bridge interfaces for each additional IP and MAC address
 for i in "${!ADDR[@]}"; do
-    interfaces_content+=$(create_bridge_text "${ADDR[i]}" "$((i + 1))")
+    interfaces_content+=$(create_bridge_text "${ADDR[i]}" "$((i + 1))" "${MACS[i]}")
 done
 
 # Save the new configuration to a temporary file
