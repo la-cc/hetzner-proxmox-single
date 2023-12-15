@@ -32,7 +32,7 @@ ADD_IP_ADDRESSES=$(prompt_input "ADDITIONAL_IP_ADDRESSES (comma-separated)" "")
 NETWORK_INTERFACE=$(prompt_input "NETWORK_INTERFACE" "eth0")
 
 # Display inputs for confirmation
-echo "--------------------------"
+echo "---------------------------------------------------------------------"
 echo "You have entered the following configuration:"
 echo "MAIN_SERVER_IP: $MAINSERVERIP"
 echo "MAIN_SERVER_GATEWAY_ADDRESS: $GATEWAYADDRESS"
@@ -41,7 +41,7 @@ echo "BROADCASTIP: $BROADCASTIP"
 echo "ADDITIONAL_IP_ADDRESSES: $ADD_IP_ADDRESSES"
 echo "NETWORK_INTERFACE: $NETWORK_INTERFACE"
 
-echo "--------------------------"
+echo "---------------------------------------------------------------------"
 read -p "Is this correct? [yes/no]: " confirmation
 
 if [[ $confirmation != [Yy]* ]]; then
@@ -98,22 +98,26 @@ done
 echo "$interfaces_content" > /tmp/new_interfaces
 
 # Display the current network configuration
-echo "--------------------------"
+echo "---------------------------------------------------------------------"
 echo "Current network configuration (/etc/network/interfaces):"
+echo ""
 cat /etc/network/interfaces
 
 # Display the new network configuration
-echo "--------------------------"
+echo "---------------------------------------------------------------------"
+echo ""
 echo "New network configuration:"
 cat /tmp/new_interfaces
 
 # Show the differences
-echo "--------------------------"
+echo "---------------------------------------------------------------------"
 echo "Configuration differences:"
+echo ""
 diff /etc/network/interfaces /tmp/new_interfaces
 
 # Confirm before applying changes
-echo "--------------------------"
+echo "---------------------------------------------------------------------"
+echo ""
 read -p "Apply this network configuration? [yes/no]: " apply_conf
 
 if [[ $apply_conf == [Yy]* ]]; then
