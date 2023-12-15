@@ -32,6 +32,7 @@ ADD_IP_ADDRESSES=$(prompt_input "ADDITIONAL_IP_ADDRESSES (comma-separated)" "")
 NETWORK_INTERFACE=$(prompt_input "NETWORK_INTERFACE" "eth0")
 
 # Display inputs for confirmation
+echo "--------------------------"
 echo "You have entered the following configuration:"
 echo "MAIN_SERVER_IP: $MAINSERVERIP"
 echo "MAIN_SERVER_GATEWAY_ADDRESS: $GATEWAYADDRESS"
@@ -39,6 +40,8 @@ echo "NETMASK: $NETMASK"
 echo "BROADCASTIP: $BROADCASTIP"
 echo "ADDITIONAL_IP_ADDRESSES: $ADD_IP_ADDRESSES"
 echo "NETWORK_INTERFACE: $NETWORK_INTERFACE"
+
+echo "--------------------------"
 read -p "Is this correct? [yes/no]: " confirmation
 
 if [[ $confirmation != [Yy]* ]]; then
@@ -91,9 +94,13 @@ for i in "${!ADDR[@]}"; do
     interfaces_content+=$(create_bridge_text "${ADDR[i]}" "$((i + 1))")
 done
 
-echo "$interfaces_content" >interfaces
+# Display the generated configuration for review
+echo "--------------------------"
+echo "Generated network configuration:"
+echo "$interfaces_content"
 
 # Confirm before applying changes
+echo "--------------------------"
 read -p "Apply this network configuration? [yes/no]: " apply_conf
 
 if [[ $apply_conf == [Yy]* ]]; then
