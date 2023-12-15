@@ -121,9 +121,11 @@ echo ""
 read -p "Apply this network configuration? [yes/no]: " apply_conf
 
 if [[ $apply_conf == [Yy]* ]]; then
-    mv /etc/network/interfaces /etc/network/interfaces.old
-    mv interfaces /etc/network/interfaces
+    timestamp=$(date +%Y%m%d-%H%M%S)
+    mv /etc/network/interfaces /etc/network/interfaces.bak-$timestamp
+    mv /tmp/new_interfaces /etc/network/interfaces
     echo "The network can be restarted with the following command: /etc/init.d/networking restart"
 else
     echo "Exiting without applying changes."
+    rm /tmp/new_interfaces
 fi
