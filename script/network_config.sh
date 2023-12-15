@@ -8,21 +8,36 @@ prompt_input() {
     echo "${input:-$default}"
 }
 
-# Function to create bridge interface text for additional IP
+# Function to create bridge interface text for additional IP and internal bridges
 create_bridge_text() {
     local ip=$1
     local bridge_id=$2
     local mac_address=$3
-    echo "
-auto vmbr${bridge_id}
-iface vmbr${bridge_id} inet static
+    local external_bridge_id=$((10 + (bridge_id - 1) * 2))
+    local internal_bridge_id=$((external_bridge_id + 1))
+
+    # External bridge configuration with MAC address and public IP
+    local bridge_config="
+auto vmbr${external_bridge_id}
+iface vmbr${external_bridge_id} inet static
     address ${ip}
     netmask ${NETMASK}
     bridge_ports none
     bridge_stp off
     bridge_fd 0
     hwaddress ether ${mac_address}
-#LAN${bridge_id}"
+# External ${bridge_id}"
+
+    # Internal bridge configuration without an IP, as it's for internal network only
+    bridge_config+="
+auto vmbr${internal_bridge_id}
+iface vmbr${internal_bridge_id} inet manual
+    bridge_ports none
+    bridge_stp off
+    bridge_fd 0
+# Internal ${bridge_id}"
+
+    echo "$bridge_config"
 }
 
 # Collect inputs
@@ -67,34 +82,20 @@ auto lo
 iface lo inet loopback
 iface lo inet6 loopback
 
-iface ${NETWORK_INTERFACE} inet manual
-  up ip route add -net up ip route add -net ${GATEWAYADDRESS} netmask ${NETMASK} gw  ${GATEWAYADDRESS} vmbr0
-  up sysctl -w net.ipv4.ip_forward=1
-  up sysctl -w net.ipv4.conf.${NETWORK_INTERFACE}.send_redirects=0
-  up sysctl -w net.ipv6.conf.all.forwarding=1
-  up ip route add 192.168.0.0/16 via ${ADDR[0]} dev vmbr0
-  up ip route add 172.16.0.0/12 via ${ADDR[0]} dev vmbr0
-  up ip route add 10.0.0.0/8 via ${ADDR[0]} dev vmbr0
-
-iface ${NETWORK_INTERFACE} inet6 static
-  address 2a01:4f8:110:5143::2
-  netmask 64
-  gateway fe80::1
-
 auto vmbr0
 iface vmbr0 inet static
-        address  ${MAINSERVERIP}
-        netmask  32
-        gateway  ${GATEWAYADDRESS}
-        broadcast  ${BROADCASTIP}
-        bridge-ports ${NETWORK_INTERFACE}
-        bridge-stp off
-        bridge-fd 0
-        pointopoint ${GATEWAYADDRESS}
-#WAN
+    address  ${MAINSERVERIP}
+    netmask  32
+    gateway  ${GATEWAYADDRESS}
+    broadcast  ${BROADCASTIP}
+    bridge-ports ${NETWORK_INTERFACE}
+    bridge-stp off
+    bridge-fd 0
+    pointopoint ${GATEWAYADDRESS}
+# Main IP configuration
 "
 
-# Append bridge interfaces for each additional IP and MAC address
+# Append bridge interfaces for each additional IP and MAC address and create internal bridges
 for i in "${!ADDR[@]}"; do
     interfaces_content+=$(create_bridge_text "${ADDR[i]}" "$((i + 1))" "${MACS[i]}")
 done
@@ -105,31 +106,30 @@ echo "$interfaces_content" > /tmp/new_interfaces
 # Display the current network configuration
 echo "---------------------------------------------------------------------"
 echo "Current network configuration (/etc/network/interfaces):"
-echo ""
 cat /etc/network/interfaces
+echo ""
 
 # Display the new network configuration
 echo "---------------------------------------------------------------------"
-echo ""
 echo "New network configuration:"
 cat /tmp/new_interfaces
+echo ""
 
 # Show the differences
 echo "---------------------------------------------------------------------"
 echo "Configuration differences:"
-echo ""
 diff /etc/network/interfaces /tmp/new_interfaces
+echo ""
 
 # Confirm before applying changes
 echo "---------------------------------------------------------------------"
-echo ""
 read -p "Apply this network configuration? [yes/no]: " apply_conf
 
 if [[ $apply_conf == [Yy]* ]]; then
     timestamp=$(date +%Y%m%d-%H%M%S)
     mv /etc/network/interfaces /etc/network/interfaces.bak-$timestamp
     mv /tmp/new_interfaces /etc/network/interfaces
-    echo "The network can be restarted with the following command: /etc/init.d/networking restart"
+    echo "The network can be restarted with the following command: '/etc/init.d/networking' restart or: 'systemctl restart networking'"
 else
     echo "Exiting without applying changes."
     rm /tmp/new_interfaces
