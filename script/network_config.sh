@@ -94,10 +94,23 @@ for i in "${!ADDR[@]}"; do
     interfaces_content+=$(create_bridge_text "${ADDR[i]}" "$((i + 1))")
 done
 
-# Display the generated configuration for review
+# Save the new configuration to a temporary file
+echo "$interfaces_content" > /tmp/new_interfaces
+
+# Display the current network configuration
 echo "--------------------------"
-echo "Generated network configuration:"
-echo "$interfaces_content"
+echo "Current network configuration (/etc/network/interfaces):"
+cat /etc/network/interfaces
+
+# Display the new network configuration
+echo "--------------------------"
+echo "New network configuration:"
+cat /tmp/new_interfaces
+
+# Show the differences
+echo "--------------------------"
+echo "Configuration differences:"
+diff /etc/network/interfaces /tmp/new_interfaces
 
 # Confirm before applying changes
 echo "--------------------------"
