@@ -13,8 +13,8 @@ create_bridge_text() {
     local ip=$1
     local bridge_id=$2
     local mac_address=$3
-    local external_bridge_id=$((10 + (bridge_id - 1) * 2))
-    local internal_bridge_id=$((external_bridge_id + 1))
+    local external_bridge_id=$bridge_id
+    local internal_bridge_id=$((bridge_id * 100))
 
     # External bridge configuration with MAC address and public IP
     local bridge_config="
@@ -26,7 +26,8 @@ iface vmbr${external_bridge_id} inet static
     bridge_stp off
     bridge_fd 0
     hwaddress ether ${mac_address}
-# External ${bridge_id}"
+# External ${external_bridge_id}
+"
 
     # Internal bridge configuration without an IP, as it's for internal network only
     bridge_config+="
@@ -35,7 +36,8 @@ iface vmbr${internal_bridge_id} inet manual
     bridge_ports none
     bridge_stp off
     bridge_fd 0
-# Internal ${bridge_id}"
+# Internal ${internal_bridge_id}
+"
 
     echo "$bridge_config"
 }
@@ -97,7 +99,9 @@ iface vmbr0 inet static
 
 # Append bridge interfaces for each additional IP and MAC address and create internal bridges
 for i in "${!ADDR[@]}"; do
-    interfaces_content+=$(create_bridge_text "${ADDR[i]}" "$((i + 1))" "${MACS[i]}")
+    # Increment bridge_id for each additional IP
+    bridge_id=$((i + 1))
+    interfaces_content+=$(create_bridge_text "${ADDR[i]}" "$bridge_id" "${MACS[i]}")
 done
 
 # Save the new configuration to a temporary file
@@ -129,7 +133,7 @@ if [[ $apply_conf == [Yy]* ]]; then
     timestamp=$(date +%Y%m%d-%H%M%S)
     mv /etc/network/interfaces /etc/network/interfaces.bak-$timestamp
     mv /tmp/new_interfaces /etc/network/interfaces
-    echo "The network can be restarted with the following command: '/etc/init.d/networking' restart or: 'systemctl restart networking'"
+    echo "The network can be restarted with the following command: '/etc/init.d/networking' restart or 'systemctl restart networking'"
 else
     echo "Exiting without applying changes."
     rm /tmp/new_interfaces
