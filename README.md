@@ -85,6 +85,8 @@ You'll need to request a MAC address for the IP address. This MAC address will b
 
 ## 4. Config Network
 
+**Note:** they are a newer version of the network configuration script in the folder `script` called `network_config_updated.sh` which has Multiple IP Address Support, User Confirmation Process, Dynamic Bridge Interface Creation and Improved User Interaction. You can see the whole change under the [pull request](https://github.com/la-cc/hetzner-proxmox-single/pull/3)
+
 Clone this git repository and execute the script:
 
     ./script/nework_config.sh
@@ -127,3 +129,13 @@ You will see the ADD-IP-Address. So SNAT is working and you can extend to config
 Default credentials are set to **username:** **_admin_** with **password:** **_pfsense_**.
 
 ## **Finished, enjoy your Proxmox Environment!**
+
+# Contribution
+
+If you're eager to contribute to this script, feel free to fork the repository and submit a pull request. Your input is valued and always welcome!
+
+Current Contributors:
+
+@L-U-C-K-Y
+@V-JobDone
+@la-cc
