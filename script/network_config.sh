@@ -16,7 +16,7 @@ create_bridge_text() {
     local external_bridge_id=$bridge_id
     local internal_bridge_id=$((bridge_id * 100))
 
-    # External bridge configuration with MAC address and public IP
+    # WAN bridge configuration with MAC address and public IP
     local bridge_config="
 auto vmbr${external_bridge_id}
 iface vmbr${external_bridge_id} inet static
@@ -26,17 +26,17 @@ iface vmbr${external_bridge_id} inet static
     bridge_stp off
     bridge_fd 0
     hwaddress ether ${mac_address}
-# External ${external_bridge_id}
+#WAN ${external_bridge_id}
 "
 
-    # Internal bridge configuration without an IP, as it's for internal network only
+    # LAN bridge configuration without an IP, as it's for internal network only
     bridge_config+="
 auto vmbr${internal_bridge_id}
 iface vmbr${internal_bridge_id} inet manual
     bridge_ports none
     bridge_stp off
     bridge_fd 0
-# Internal ${internal_bridge_id}
+#LAN ${internal_bridge_id}
 "
 
     echo "$bridge_config"
@@ -94,7 +94,7 @@ iface vmbr0 inet static
     bridge-stp off
     bridge-fd 0
     pointopoint ${GATEWAYADDRESS}
-# Main IP configuration
+#Main IP configuration
 "
 
 # Append bridge interfaces for each additional IP and MAC address and create internal bridges
