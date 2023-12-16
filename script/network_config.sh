@@ -74,6 +74,13 @@ fi
 IFS=',' read -ra ADDR <<<"$ADD_IP_ADDRESSES"
 IFS=',' read -ra MACS <<<"$MAC_ADDRESSES"
 
+# Generate dynamic routing rules
+additional_routes=""
+for add_ip in "${ADDR[@]}"; do
+    additional_routes+="    up ip route add $add_ip dev ${NETWORK_INTERFACE}
+"
+done
+
 # Initialize the interfaces file content
 interfaces_content="
 ### Hetzner Online GmbH installimage
@@ -83,6 +90,17 @@ source /etc/network/interfaces.d/*
 auto lo
 iface lo inet loopback
 iface lo inet6 loopback
+
+# Main network interface configuration
+iface ${NETWORK_INTERFACE} inet manual
+    up ip route add -net ${GATEWAYADDRESS} netmask ${NETMASK} gw ${GATEWAYADDRESS} vmbr0
+    up sysctl -w net.ipv4.ip_forward=1
+    up sysctl -w net.ipv4.conf.${NETWORK_INTERFACE}.send_redirects=0
+    up sysctl -w net.ipv6.conf.all.forwarding=1
+$additional_routes
+    up ip route add 192.168.0.0/16 via ${MAINSERVERIP} dev vmbr0
+    up ip route add 172.16.0.0/12 via ${MAINSERVERIP} dev vmbr0
+    up ip route add 10.0.0.0/8 via ${MAINSERVERIP} dev vmbr0
 
 auto vmbr0
 iface vmbr0 inet static
