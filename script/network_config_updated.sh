@@ -105,7 +105,7 @@ $additional_routes
 auto vmbr0
 iface vmbr0 inet static
     address  ${MAINSERVERIP}
-    netmask  32
+    netmask  ${NETMASK}
     gateway  ${GATEWAYADDRESS}
     broadcast  ${BROADCASTIP}
     bridge-ports ${NETWORK_INTERFACE}
