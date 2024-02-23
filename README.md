@@ -89,7 +89,7 @@ You'll need to request a MAC address for the IP address. This MAC address will b
 
 Clone this git repository and execute the script:
 
-    ./script/nework_config.sh
+    ./script/network_config.sh
 
 All necessary information (main server ip, gateway, etc.) can be taken from the hetzner robot page like this:
 
