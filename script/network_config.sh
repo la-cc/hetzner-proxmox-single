@@ -37,7 +37,7 @@ iface ${NETWORK_INTERFACE} inet6 static
 auto vmbr0
 iface vmbr0 inet static
         address  ${MAINSERVERIP}
-        netmask  32
+        netmask  ${NETMASK}
         gateway  ${GATEWAYADRESS}
         broadcast  ${BROADCASTIP}
         bridge-ports ${NETWORK_INTERFACE}
