@@ -1,6 +1,8 @@
 # Hetzner Proxmox VE Single Setup
 
-This repo is about the installation of Proxmox 7.X on Hetzner with pfsense as firewall for WAN, IP floating with additional IP address for the VM's to allow SNAT.
+_NOTE_: You can find more information about the preparation steps, including how to order a server from Hetzner and set up the necessary network configuration, in my [Medium Blog - Setup VE with Proxmox on Hetzner — Single Mode](https://medium.com/@artem_lajko/setup-ve-with-proxmox-on-hetzner-single-mode-6b76061efcdb)
+
+This repo is about the installation of Proxmox 7.X.X and 8.X.X on Hetzner with pfsense as firewall for WAN, IP floating with additional IP address for the VM's to allow SNAT. The setup was last tested on 13.06.2024.
 
 # Hetzner Promox Architecture
 
@@ -46,7 +48,7 @@ From:
 
 To:
 
-    PART /boot ext**4** 512M
+    PART /boot ext4 512M
     PART lvm vg0 all
 
     LV vg0 root / ext4 100G
